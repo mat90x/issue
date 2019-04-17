@@ -31,8 +31,7 @@ images.sort(key=lambda img: img.width*img.height, reverse=True)
 
 # Make tiles from images
 imglen = len(images)
-tiles =
-[
+tiles = [
     [[images[x] for x in range(y, min(y + cols, imglen))]    # for each col
         for y in range(t, min(t + rows*cols, imglen), cols)] # for each row
             for t in range(0, imglen, rows*cols)             # for each tile
