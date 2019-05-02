@@ -5,9 +5,12 @@ import argparse
 from PIL import Image
 
 argsparser = argparse.ArgumentParser()
-argsparser.add_argument("--size", "-s", type=str, default="6x3", help="maximum size for each tile")
-argsparser.add_argument("--paint", "-p", type=str, default="524e4e", help="color for background")
-argsparser.add_argument("--cat", "-c", type=str, default=".", help="catalog to read images from")
+argsparser.add_argument("--size", "-s", type=str,
+                        default="6x3", help="maximum size for each tile")
+argsparser.add_argument("--paint", "-p", type=str,
+                        default="524e4e", help="color for background")
+argsparser.add_argument("--cat", "-c", type=str,
+                        default=".", help="catalog to read images from")
 args = argsparser.parse_args()
 
 cols, rows = map(int, args.size.split('x'))
@@ -31,7 +34,7 @@ imglen = len(images)
 tiles = [
     [[images[x] for x in range(y, min(y + cols, imglen))]    # for each col
         for y in range(t, min(t + rows*cols, imglen), cols)] # for each row
-            for t in range(0, imglen, rows*cols)             # for each tile
+    for t in range(0, imglen, rows*cols)                     # for each tile
 ]
 
 # Draw by stacking images on tiles
