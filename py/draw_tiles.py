@@ -1,24 +1,21 @@
 #!/usr/local/bin/python3
 import sys
 import glob
+import argparse
 from PIL import Image
 
-catalog = '.'
-if len(sys.argv) > 1:
-    catalog = sys.argv[1]
+argsparser = argparse.ArgumentParser()
+argsparser.add_argument("--size", "-s", type=str, default="6x3", help="maximum size for each tile")
+argsparser.add_argument("--paint", "-p", type=str, default="524e4e", help="color for background")
+argsparser.add_argument("--cat", "-c", type=str, default=".", help="catalog to read images from")
+args = argsparser.parse_args()
 
-cols, rows = 6, 3
-if len(sys.argv) > 2:
-    cols, rows = [int(d) for d in sys.argv[2].split('x')]
-
-bgcolor = '524e4e'
-if len(sys.argv) > 3:
-    bgcolor = sys.argv[3]
-bgcolor = tuple(int(bgcolor[i:i+2], 16) for i in range(0, 6, 2))
+cols, rows = map(int, args.size.split('x'))
+paint = tuple(int(args.paint[i:i+2], 16) for i in range(0, 6, 2))
 
 # Load all images
 images = []
-for f in glob.glob(f'{catalog}/*'):
+for f in glob.glob(f'{args.cat}/*'):
     try:
         img = Image.open(f)
     except IOError:
@@ -40,7 +37,7 @@ tiles = [
 # Draw by stacking images on tiles
 tiles_count = 0
 for tile in tiles:
-    tile_image = Image.new(mode='RGB', size=(15000, 15000), color=bgcolor)
+    tile_image = Image.new(mode='RGB', size=(15000, 15000), color=paint)
     tile_width, tile_height = 0, 0
 
     y = 0
