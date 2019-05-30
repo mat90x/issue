@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Webpage for search query</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style type="text/css">
+            body {
+                text-align: center;
+                background: rgb(108,190,217);
+                font-family: "Times New Roman", Times, serif;
+            }
+            .div-header {
+                padding-top: 100px;
+            }
+            .div-controls {
+                margin: 20px;
+                margin-bottom: 60px;
+            }
+            .div-result {
+                border: 0px;
+                margin-top: 70px;
+                padding-top: 20px;
+                background: rgb(255,219,77);
+                font-size: 36px;
+            }
+            .text-search, .text-request {
+                color: #888;
+                padding: 5px;
+                padding-left: 10px;
+                border-radius: 5px;
+                border: 0px;
+            }
+            .text-search {
+                height: 40px;
+                width: 350px;
+                margin: 20px;
+                margin-right: 10px;
+                font-size: 24px;
+            }
+            .text-request {
+                margin: 3px;
+                height: 30px;
+                width: 720px;
+                font-size: 18px;
+            }
+            .button-search, .button-control {
+                padding: 5px;
+                border-radius: 10px;
+                border: 0px;
+                background: rgb(255,219,77);
+            }
+            .button-search {
+                height: 50px;
+                width: 150px;
+                font-size: 24px;
+            }
+            .button-control {
+                height: 40px;
+                width: 180px;
+                font-size: 18px;
+            }
+        </style>
+        <script type="text/javascript" src="https://code.jquery.com/jquery-3.1.1.js" integrity="sha256-16cdPddA6VdVInumRGo6IbivbERE8p7CQR3HzTBuELA=" crossorigin="anonymous"></script>
+        <script type="text/javascript">
+            var inputs_index = 1;
+    
+            function add_search_field () {        
+                ++inputs_index;
+        
+                var new_input_text = document.createElement("input");
+                new_input_text.type = "text";
+                new_input_text.id = "input"+inputs_index;
+                new_input_text.value = "Enter search query...";
+                new_input_text.defaultValue = "Enter search query...";
+                new_input_text.className = "text-request";
+
+                var new_br = document.createElement("br");
+                new_br.id = "br" + inputs_index;
+        
+                var header = document.getElementById("header");
+                header.appendChild(new_input_text);
+                header.appendChild(new_br);
+
+                $("input.text-request").focus(
+                    function() {
+                        if($(this).val() == this.defaultValue) {
+                            $(this).val('').css('color','#000');
+                        }
+                    }
+                );
+                $("input.text-request").blur(
+                    function() {
+                        if($(this).val() == "") {
+                            $(this).val(this.defaultValue).css('color','#888');
+                        }            
+                    }
+                );
+    
+            }
+    
+            function delete_search_field() {
+                if(inputs_index <= 1) {
+                    return;
+                }
+                document.getElementById("input" + inputs_index).remove();
+                document.getElementById("br" + inputs_index).remove();
+                --inputs_index;
+            }
+            
+            function search_request() {
+                var host = document.getElementById("host");
+                
+                if(host.defaultValue == host.value) {
+                    return;
+                }
+                
+                var url = "/cgi-bin/yndx_search_req?host=" + host.value;
+                var if_has_req = 0;
+            
+                for(var i = 1; i <= inputs_index; ++i) {
+                    var request = document.getElementById("input"+i);
+                    
+                    if(request.defaultValue == request.value) {
+                        continue;
+                    }
+                
+                    url += "&req=" + request.value;    
+                    if_has_req = 1;
+                }
+                
+                if(!if_has_req ) {
+                    return;
+                }
+ 
+                var http_req = new XMLHttpRequest();
+                http_req.open("GET", url, false);
+         
+                http_req.onreadystatechange = function() { 
+                    if(http_req.readyState == 4 && http_req.status == 200) {
+
+                        var json = JSON.parse(http_req.responseText);
+                        for(key in json ) {
+                            var new_b = document.createElement("b");
+                            new_b.innerHTML = "Position "+json[key] + " for query '" + key + "'";
+                            new_b.className = "text-result";
+
+                            var new_br = document.createElement("br");
+                            var result = document.getElementById("result");
+
+                            result.appendChild(new_b);
+                            result.appendChild(new_br);
+                        }
+                    }
+                }
+                http_req.send();
+            }
+        </script>
+    </head>
+    <body>
+        <div id="header" class="div-header">
+            <input type="text" id="host" class="text-search" value="Enter site's address..." />
+            <input type="button" class="button-search" value="Search" onclick="search_request();" /><br />
+            <div id="controls" class="div-controls">
+                <input type="button" class="button-control" value="Add query" onclick="add_search_field();" />&nbsp;&nbsp;&nbsp;&nbsp;
+                <input type="button" class="button-control" value="Delete query" onclick="delete_search_field();" />
+            </div>
+            <input type="text" id="input1" class="text-request" value="Enter search query..." /><br id="br1" />
+        </div>
+        <div id="result" class="div-result"></div>
+        <script type="text/javascript">
+            $("input.text-request, input.text-search").focus(
+                function() {
+                    if($(this).val() == this.defaultValue) {
+                        $(this).val('').css('color','#000');
+                    }
+                }
+            );
+            $("input.text-request, input.text-search").blur(
+                function() {
+                    if($(this).val() == "") {
+                        $(this).val(this.defaultValue).css('color','#888');
+                    }            
+                }
+            );
+        </script>
+    </body>
+</html>
