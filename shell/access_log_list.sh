@@ -1,10 +1,6 @@
 #!/bin/bash
 # Write program which lists the N most used IP addresses whithin S seconds.
-# Records' format is the following:
-# [dateime]\t[ip address]\t[message]
-
-# Usage:
-# n_most_used_ips_timeframe.sh filename [N] [S]
+# ./acces_log_list.sh filename [N] [S]
 
 if [ -z "$2" ]; then
     N=20
