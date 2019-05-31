@@ -2,7 +2,7 @@
 # From Sobell's...
 # Write a program that, given a pathname, creates all components in that
 # pathname as directories, For example, the command 'makepath a/b/c/d' should
-# create directories 'a', 'a/b', 'a/b/c/d'
+# create directories 'a', 'a/b', 'a/b/c/d'.
 
 mkpath() {
     if [[ ${#1} -eq 0 || -d "$1" ]]; then
