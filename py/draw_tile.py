@@ -4,13 +4,15 @@ import glob
 import argparse
 from PIL import Image
 
-argsparser = argparse.ArgumentParser()
+argsparser = argparse.ArgumentParser(description="draw tiles from images")
 argsparser.add_argument("--size", "-s", type=str,
                         default="6x3", help="maximum size for each tile")
 argsparser.add_argument("--paint", "-p", type=str,
                         default="524e4e", help="color for background")
 argsparser.add_argument("--cat", "-c", type=str,
                         default=".", help="catalog to read images from")
+argsparser.add_argument("file", type=str, nargs="+",
+                        help="particular images to draw tiles from")
 args = argsparser.parse_args()
 
 cols, rows = map(int, args.size.split('x'))
@@ -18,7 +20,8 @@ paint = tuple(int(args.paint[i:i+2], 16) for i in range(0, 6, 2))
 
 # Load all images
 images = []
-for f in glob.glob(f'{args.cat}/*'):
+files = len(args.file) and args.file or glob.glob(f'{args.cat}/*')
+for f in files:
     try:
         img = Image.open(f)
     except IOError:
@@ -33,7 +36,7 @@ images.sort(key=lambda img: img.width*img.height, reverse=True)
 imglen = len(images)
 tiles = [
     [[images[x] for x in range(y, min(y + cols, imglen))]    # for each col
-        for y in range(t, min(t + rows*cols, imglen), cols)] # for each row
+        for y in range(t, min(t + rows*cols, imglen), cols)]  # for each row
     for t in range(0, imglen, rows*cols)                     # for each tile
 ]
 
