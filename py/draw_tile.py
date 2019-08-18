@@ -1,32 +1,37 @@
-#!/usr/local/bin/python3
+#!/usr/bin/env python3
 import sys
+import os
 import glob
 import argparse
 from PIL import Image
 
-argsparser = argparse.ArgumentParser(description="draw tiles from images")
-argsparser.add_argument("--size", "-s", type=str,
-                        default="6x3", help="maximum size for each tile")
-argsparser.add_argument("--paint", "-p", type=str,
-                        default="524e4e", help="color for background")
-argsparser.add_argument("--cat", "-c", type=str,
-                        default=".", help="catalog to read images from")
-argsparser.add_argument("file", type=str, nargs="+",
-                        help="particular images to draw tiles from")
-args = argsparser.parse_args()
+ap = argparse.ArgumentParser(description='Draw tiles of images.')
+ap.add_argument('-s', '--size', type=str, default='6x3', help='maximum size for each tile')
+ap.add_argument('-c', '--bgcolor', type=str, default='524e4e', help='background color')
+ap.add_argument('-t', '--path_to', type=str, default='./', help='path where to save results')
+ap.add_argument('path', metavar='PATH', type=str, default='./', help='path to image files')
+args = ap.parse_args()
 
 cols, rows = map(int, args.size.split('x'))
-paint = tuple(int(args.paint[i:i+2], 16) for i in range(0, 6, 2))
+bgcolor = tuple(int(args.bgcolor[i:i+2], 16) for i in range(0, 6, 2))
+path = args.path.rstrip('/')
+path_to = args.path_to.rstrip('/')
+
+if not os.path.exists(path_to):
+    os.makedirs(path_to)
 
 # Load all images
 images = []
-files = len(args.file) and args.file or glob.glob(f'{args.cat}/*')
-for f in files:
+for f in glob.glob(f'{path}/*'):
+    if not os.path.isfile(f):
+        continue
+
     try:
         img = Image.open(f)
     except IOError:
         print(f"couldn't open file {f}")
         continue
+
     images.append(img)
 
 # Sort ascending by squares to minimize 'whitespace'
@@ -43,7 +48,7 @@ tiles = [
 # Draw by stacking images on tiles
 tiles_count = 0
 for tile in tiles:
-    tile_image = Image.new(mode='RGB', size=(15000, 15000), color=paint)
+    tile_image = Image.new(mode='RGB', size=(15000, 15000), color=bgcolor)
     tile_width, tile_height = 0, 0
 
     y = 0
@@ -65,4 +70,4 @@ for tile in tiles:
 
     tiles_count += 1
     tile_image = tile_image.crop(box=(0, 0, tile_width, tile_height))
-    tile_image.save(f'tile{tiles_count}.jpg')
+    tile_image.save(f'{path_to}/tile{tiles_count}.jpg')

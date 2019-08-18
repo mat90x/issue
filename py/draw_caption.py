@@ -1,4 +1,4 @@
-#!/usr/local/bin/python3
+#!/usr/bin/env python3
 import sys
 import os
 import argparse
@@ -6,50 +6,41 @@ from PIL import Image
 from PIL import ImageFont
 from PIL import ImageDraw
 
-argsparser = argparse.ArgumentParser()
-argsparser.add_argument("--delim", "-d", type=str,
-                        default='/', help="field delimeter character in file")
-argsparser.add_argument("--size", "-s", type=int,
-                        default=180, help="font size to draw in points")
-argsparser.add_argument("--paint", "-p", type=str,
-                        default="ff0000", help="color of titles to paint")
-argsparser.add_argument("--name", "-n", type=str,
-                        default=argparse.SUPPRESS, help="specific file name to title")
-argsparser.add_argument("--cat", "-c", type=str,
-                        default=argparse.SUPPRESS, help="catalog to save titled files")
-argsparser.add_argument(
-    "file", type=str, help="path to file containing files' names and titles")
-args = argsparser.parse_args()
+ap = argparse.ArgumentParser(description='Draw caption to image.')
+ap.add_argument('-d', '--delim', type=str, default='/', help='fields separation delimeter for SOURCE')
+ap.add_argument('-s', '--font_size', type=int, default=180, help='in pixels')
+ap.add_argument('-c', '--font_color', type=str, default='ff0000', help='RGB code in hex')
+ap.add_argument('-f', '--path_from', type=str, default='./', help='path to image files')
+ap.add_argument('-t', '--path_to', type=str, default='./', help='path where to save results')
+ap.add_argument('source', metavar='SOURCE', type=str, help='path to file containing image name and caption to draw')
+args = ap.parse_args()
 
-paint = tuple(int(args.paint[i:i+2], 16) for i in range(0, 6, 2))
+font_color = tuple(int(args.font_color[i:i+2], 16) for i in range(0, 6, 2))
+path_from = args.path_from.rstrip('/')
+path_to = args.path_to.rstrip('/')
+font_size = args.font_size * 0.75 # point to pixel ratio
 
-with open(args.file, 'r') as f:
-    for line in f:
+if not os.path.exists(path_to):
+    os.makedirs(path_to)
+
+with open(args.source, 'r') as src:
+
+    for line in src:
         try:
             file, title = map(str.strip, line.split(args.delim))
         except ValueError:
             print(f"{file} hasn't got value")
             continue
 
-        if hasattr(args, 'name') and not file.startswith(args.name):
-            continue
-
         try:
-            img = Image.open(file)
+            img = Image.open(path_from + '/' + file)
         except IOError:
             print(f"{file} couldn't find file")
             continue
 
         iw, ih = img.size
         draw = ImageDraw.Draw(img)
-        font = ImageFont.truetype("DejaVuSans.ttf", int(args.size))
+        font = ImageFont.truetype('DejaVuSans.ttf', int(font_size))
         fw, fh = font.getsize(title)
-        draw.text((iw - 1.15*fw, ih - 1.2*fh), title, paint, font=font)
-
-        if hasattr(args, 'cat'):
-            if not os.path.exists(args.cat):
-                os.makedirs(args.cat)
-
-            img.save(args.cat + '/' + file)
-        else:
-            img.save(file)
+        draw.text((iw - 1.15*fw, ih - 1.2*fh), title, font_color, font=font)
+        img.save(path_to + '/' + file)
