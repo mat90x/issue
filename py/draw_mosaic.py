@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import sys
 import os
-import glob
 import argparse
 from PIL import Image
 from PIL import ImageFont
