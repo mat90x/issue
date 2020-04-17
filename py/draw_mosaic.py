@@ -38,6 +38,8 @@ for line in sys.stdin:
     if not name:
         print(f'empty name for row #{row_number}')
         sys.exit(1)
+    elif name.startswith('#'):
+        continue
 
     margin_top, margin_left = args.margin_top / 100, args.margin_left / 100
     size = int(size and int(size) * 0.75 or args.font_size)
